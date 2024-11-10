@@ -172,9 +172,13 @@ def main():
             resultado_integral = calcular_integral_definida(coef, graus, a, b)
             print(f"Integral definida de {a} a {b}: {resultado_integral}")
 
+           # Perguntar o número de retângulos para a soma de Riemann
+            num_retangulos = int(input("Digite o número de retângulos para a soma de Riemann: "))
+
             # Calcular a área usando soma de Riemann
-            area_soma_riemann = preencher_area_soma_riemann(x_values, y_polinomio, a, b)
+            area_soma_riemann = preencher_area_soma_riemann(x_values, y_polinomio, a, b, num_retangulos)
             print(f"Área sob o polinômio entre {a} e {b} (Soma de Riemann): {area_soma_riemann:.2f}")
+
 
             # Plotar o gráfico
             plotar_grafico(x_values, y_polinomio, y_integral, a, b, equacao_polinomio, integral_polinomio, area_soma_riemann)
