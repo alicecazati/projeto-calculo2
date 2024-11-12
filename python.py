@@ -1,10 +1,19 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import quad  # Importar a função para calcular a integral definida
+from scipy.integrate import quad  
 
-# Função para ordenar o polinômio em ordem decrescente de grau
-def ordenar_polinomio(coef, graus):
-    return zip(*sorted(zip(coef, graus), key=lambda x: x[1], reverse=True))
+
+# Função para simplificar o polinômio somando termos de mesmo grau
+def simplificar_polinomio(coef, graus):
+    termos_simplificados = {}
+    for c, g in zip(coef, graus):
+        if g in termos_simplificados:
+            termos_simplificados[g] += c
+        else:
+            termos_simplificados[g] = c
+    # Ordenar em ordem decrescente de grau
+        graus_simplificados, coef_simplificados = zip(*sorted(termos_simplificados.items(), key=lambda x: x[0], reverse=True))
+    return coef_simplificados, graus_simplificados
 
 # Função para calcular o polinômio e sua integral
 def calcular_polinomio_e_integral(coef, graus, intervalo_min, intervalo_max, passo):
@@ -28,7 +37,7 @@ def construir_equacao_polinomio_e_integral(coeficientes, graus):
 
     for coef, grau in termos_polinomio:
         if coef == 0:
-            continue  # Ignorar termos com coeficiente zero
+            continue  
 
         # Formatar o termo do polinômio
         if grau == 0:
@@ -130,6 +139,39 @@ def plotar_grafico(valores_x, valores_y_polinomio, valores_y_integral, a, b, equ
 def calcular_valor_funcional(coef, graus, a):
     valor = sum(c * a**g for c, g in zip(coef, graus))
     return valor
+# Função para plotar os valores funcionais no gráfico
+def plotar_valores_funcionais(valores_x, valores_y):
+    plt.figure(figsize=(8, 8))
+    
+    # Plotar os pontos como marcadores vermelhos
+    plt.scatter(valores_x, valores_y, color='red', label='Valores Funcionais', zorder=5)
+    
+    # Adicionar as coordenadas de cada ponto diretamente no gráfico
+    for x, y in zip(valores_x, valores_y):
+        plt.text(x, y, f"({x}, {y:.2f})", fontsize=12, ha='right')
+    
+    # Definir limites para os eixos x e y
+    plt.xlim(-9,9)
+    plt.ylim(-100,100)
+    
+    # Adicionar linhas horizontais e verticais para o eixo x e y
+    plt.axhline(0, color='black', linewidth=0.5)
+    plt.axvline(0, color='black', linewidth=0.5)
+    
+    
+    
+    # Ativar a grade do gráfico
+    plt.grid(True)
+    # Labels e título
+    plt.xlabel("x")
+    plt.ylabel("f(x)")
+    plt.title("Valores Funcionais em um Plano Cartesiano")
+    
+    # Exibir a legenda
+    plt.legend()
+    
+    # Exibir o gráfico
+    plt.show()
 
 # Função principal para coordenar a leitura dos dados e a plotagem
 def main():
@@ -149,7 +191,8 @@ def main():
             graus.append(int(g))
 
         # Ordenar polinômio
-        coef, graus = ordenar_polinomio(coef, graus)
+         
+        coef, graus = simplificar_polinomio(coef, graus)  # Chamada para simplificar
 
         # Definir os limites do intervalo e o passo
         intervalo_min = -10.0
@@ -182,20 +225,32 @@ def main():
 
             # Plotar o gráfico
             plotar_grafico(x_values, y_polinomio, y_integral, a, b, equacao_polinomio, integral_polinomio, area_soma_riemann)
-
-        # Cálculo de valores funcionais
-        valores_funcionais = []
-        while len(valores_funcionais) < 5:
-            entrada = input("Digite o valor funcional em um ponto (digite 'sair' para encerrar): ")
-            if entrada.lower() == 'sair':
-                break
-            try:
-                a = float(entrada)
-                valor_funcional = calcular_valor_funcional(coef, graus, a)
-                valores_funcionais.append(valor_funcional)
-                print(f"O valor funcional do polinômio em x = {a} é: {valor_funcional}")
-            except ValueError:
-                print("Entrada inválida! Por favor, insira um número válido.")
+          # Perguntar se deseja calcular os valores funcionais
+            calcular_valores_funcionais = input("Deseja calcular os valores funcionais (S/N)? ").strip().lower()
+            if calcular_valores_funcionais == 's':
+                valores_funcionais_x = []  # Certifique-se de que as listas estejam fora do loop
+                valores_funcionais_y = []
+                
+                # Obter os valores funcionais
+                while True:
+                    entrada = input("Digite o ponto para o valor funcional (ou 'sair' para encerrar): ")
+                    if entrada.lower() == 'sair':
+                        break
+                    try:
+                        a = float(entrada)
+                        valor_funcional = calcular_valor_funcional(coef, graus, a)
+                        valores_funcionais_x.append(a)  # Adicionar o valor de x na lista
+                        valores_funcionais_y.append(valor_funcional)  # Adicionar o valor de f(x) na lista
+                        print(f"f({a}) = {valor_funcional}")
+                    except ValueError:
+                        print("Entrada inválida! Por favor, insira um número válido.")
+                
+                # Verificar a quantidade de pontos coletados
+                print(f"Valores coletados: {len(valores_funcionais_x)} pontos.")
+                
+                # Plotar o gráfico dos valores funcionais após o gráfico da integral
+                if valores_funcionais_x:  # Verificar se a lista não está vazia
+                     plotar_valores_funcionais(valores_funcionais_x, valores_funcionais_y)
 
 if __name__ == "__main__":
     main()
